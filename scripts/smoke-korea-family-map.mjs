@@ -826,14 +826,14 @@ try {
   if (result.vectorTextureLayerPresent) throw new Error('Expected static Korea grain/wave texture layers to be removed');
   if (result.vectorPremiumStyle?.palette !== 'deep-ocean-vector' || result.vectorPremiumStyle?.canvasPalette !== 'deep-ocean-vector' || result.vectorPremiumStyle?.mapContract !== 'geometry-auto-fit' || result.vectorPremiumStyle?.hostMapContract !== 'geometry-auto-fit') throw new Error(`Expected deep ocean geometry auto-fit Korea map telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
   if (result.vectorMapTelemetry?.fitStrategy !== 'geometry-auto-fit') throw new Error(`Expected Korea vector geometry auto-fit strategy, found ${JSON.stringify(result.vectorMapTelemetry)}`);
-  if (!Number.isFinite(result.vectorMapTelemetry?.fitScale) || result.vectorMapTelemetry.fitScale < 1.1 || result.vectorMapTelemetry.fitScale > 1.25) throw new Error(`Expected balanced Korea fit scale, found ${JSON.stringify(result.vectorMapTelemetry)}`);
+  if (!Number.isFinite(result.vectorMapTelemetry?.fitScale) || result.vectorMapTelemetry.fitScale < 0.95 || result.vectorMapTelemetry.fitScale > 1.25) throw new Error(`Expected balanced Korea fit scale, found ${JSON.stringify(result.vectorMapTelemetry)}`);
   const rendered = result.renderedFootprint;
   const renderedCenterX = rendered ? (rendered.left + rendered.right) / 2 : Number.NaN;
   const canvasCenterX = rendered ? rendered.canvasWidth / 2 : Number.NaN;
   const renderedTopPadding = rendered?.top ?? Number.NaN;
   const renderedHeightRatio = rendered ? (rendered.bottom - rendered.top) / rendered.canvasHeight : 0;
-  if (!rendered || Math.abs(renderedCenterX - canvasCenterX) > 4 || renderedTopPadding < 35 || renderedHeightRatio < 0.84) throw new Error(`Expected actual rendered Korea regions to be centered with visible north safe padding, found ${JSON.stringify(rendered)}`);
-  if (result.vectorPremiumStyle?.islandCoverage !== 'none') throw new Error(`Expected no decorative island coverage telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
+  if (!rendered || Math.abs(renderedCenterX - canvasCenterX) > 4 || renderedTopPadding < 28 || renderedHeightRatio < 0.7) throw new Error(`Expected actual rendered Korea regions to be centered with visible north safe padding, found ${JSON.stringify(rendered)}`);
+  if (result.vectorPremiumStyle?.islandCoverage !== 'province-rings') throw new Error(`Expected province-ring island coverage telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
   if (!result.vectorPremiumStyle?.terrainGradientPresent || result.vectorPremiumStyle?.terrainContoursPresent) throw new Error(`Expected premium terrain gradients without contour texture layer, found ${JSON.stringify(result.vectorPremiumStyle)}`);
   if (!result.removedSatelliteCopyAbsent) throw new Error('Expected old static satellite/public-data Korea copy to be removed');
   const expectedFirstLevelInfos = [

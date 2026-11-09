@@ -74,8 +74,8 @@
     "requiredIslandReferencesKo": [],
     "islandAdministrativeContext": {},
     "decorativeIslandReferencePolicy": {
-      "status": "removed",
-      "reason": "Product decision: no separate decorative island markers or labels are rendered. Jeju remains represented only by the 제주특별자치도 administrative polygon; Ulleungdo and Dokdo are omitted from the family navigation overlay to keep the premium map uncluttered."
+      "status": "province-geometry",
+      "reason": "No separate decorative island markers or hit targets. Jeju, Ulleungdo, and Dokdo are drawn with the province shapes. Ulleungdo and Dokdo are enlarged slightly around their true centers so they stay readable on a phone."
     }
   },
   "capitals": {

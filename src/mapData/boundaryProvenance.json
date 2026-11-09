@@ -33,7 +33,7 @@
     },
     "islandReferencePolicy": {
       "requiredIslandReferencesKo": [],
-      "renderingDecision": "Do not render separate decorative island markers or labels in the Korea family overlay. Jeju is represented by its 제주특별자치도 administrative polygon; Ulleungdo and Dokdo are omitted by product decision to keep the premium family navigation map uncluttered.",
+      "renderingDecision": "Do not render separate decorative island markers or extra hit targets. Jeju is the 제주특별자치도 polygon, Ulleungdo is the detached Gyeongbuk ring enlarged slightly around its true center for legibility, and Dokdo is a small symbol centered on its real projected WGS84 point. Speck rings below the area threshold stay hidden.",
       "accuracyNotice": "This overlay is a family gift navigation surface and must not be presented as a legal boundary or sovereignty claim."
     }
   },
@@ -89,5 +89,5 @@
       "reason": "Violates the static/no-live-API requirement and adds runtime dependency risk."
     }
   ],
-  "attributionText": "Korea family overlay: static normalized vector satellite-inspired boundary-guide visualization documented from 국토교통부_일별법정구역정보 / VWorld legal-boundary metadata; decorative island marker references are intentionally removed, Jeju is represented only by 제주특별자치도, and no legal-boundary accuracy claim is made."
+  "attributionText": "Korea family overlay: static normalized vector boundary guide from southkorea-maps KOSTAT rings. Jeju, coastal islands, Ulleungdo, and a legibility-scaled Dokdo symbol are drawn with their provinces. Not a legal-boundary dataset."
 }

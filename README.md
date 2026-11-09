@@ -4,11 +4,12 @@ A premium, shareable 3D globe gift for the whole family.
 
 ## Korea family map zoom data notes
 
-G003 keeps the Korea family map zoom fully static and client-side. The current
+The Korea family map zoom stays fully static and client-side. The current
 committed family-map overlay is `korea-real-coordinate-boundaries-v3`: 17
 first-level Korea regions plus Busan/Haeundae, Seoul/Mapo, and
-Gyeongnam/Gimhae/Bonghwang family drilldowns. It is documented from official
-public-data/VWorld legal-boundary metadata and simplified as a static vector satellite-inspired SVG guide.
+Gyeongnam/Gimhae/Bonghwang family drilldowns. Coastlines and islands, including
+Jeju, Ulleungdo, and a legibility-scaled Dokdo symbol, come from the static
+southkorea-maps KOSTAT rings. It is a simplified vector guide, not a legal boundary.
 Do not add live map APIs, backend services, auth flows, runtime API keys, or
 legal-boundary accuracy claims. The geometry lives in
 `src/mapData/koreaFamilyBoundaries.json`, its provenance/source strategy lives in
