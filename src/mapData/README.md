@@ -15,7 +15,7 @@ This directory owns the bounded static data/provenance slice for the Korea famil
 
 ## Committed Korea geometry
 
-`koreaFamilyBoundaries.json` is a static vector satellite-inspired SVG overlay. The UI renders primary administrative landmass polygons only: Jeju remains represented by 제주특별자치도, while tiny detached island-ring clutter such as Ulleungdo-like/west-coast dot artifacts is suppressed for gift-map clarity. It stores simplified WGS84 administrative rings normalized into the app viewBox; it is still not a legal, cadastral, survey, routing, emergency, or address dataset.
+`koreaFamilyBoundaries.json` is a static vector SVG overlay. The UI draws each province's significant rings, including coastal islands, the Gwangju hole inside Jeollanam-do, Jeju, and Ulleungdo. Dokdo is a small symbol centered on its real projected point and slightly enlarged so it stays visible on a phone. Tiny speck rings stay hidden. The geometry is simplified WGS84 administrative data normalized into the app viewBox; it is still not a legal, cadastral, survey, routing, emergency, or address dataset.
 
 `worldCountryBorders.json` is the separate bundled Natural Earth 110m country-border extraction used for non-pickable decorative globe context. It is static app data, not a live service dependency.
 
