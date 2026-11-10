@@ -199,6 +199,59 @@ const regionInfoById: Partial<Record<RegionId, RegionInfo>> = {
   'kr-jeju': { namuUrl: 'https://namu.wiki/w/제주특별자치도', landmark: '성산일출봉', food: '흑돼지구이', fact: '우리나라에서 가장 큰 섬이에요. 한라산과 돌하르방이 있어요.' },
 };
 
+type QuizPrompt = {
+  readonly region: RegionId;
+  readonly ask: string;
+  readonly hint: string;
+  readonly cheer: string;
+};
+
+const quizPrompts: readonly QuizPrompt[] = [
+  { region: 'kr-jeju', ask: '한라산은 어디 있을까?', hint: '우리나라에서 가장 큰 섬이에요.', cheer: '맞아요! 한라산은 제주특별자치도에 있어요.' },
+  { region: 'kr-seoul', ask: '남산서울타워는 어디 있을까?', hint: '대한민국의 수도예요.', cheer: '맞아요! 남산서울타워는 서울특별시에 있어요.' },
+  { region: 'kr-busan', ask: '해운대 바다는 어디 있을까?', hint: '인구로 보면 두 번째로 큰 도시예요.', cheer: '맞아요! 해운대는 부산광역시에 있어요.' },
+  { region: 'kr-gangwon', ask: '설악산은 어디 있을까?', hint: '동해 바다와 높은 산이 함께 있어요.', cheer: '맞아요! 설악산은 강원특별자치도에 있어요.' },
+  { region: 'kr-gyeonggi', ask: '수원 화성은 어디 있을까?', hint: '서울을 둘러싼 도예요.', cheer: '맞아요! 수원 화성은 경기도에 있어요.' },
+  { region: 'kr-gyeongbuk', ask: '불국사는 어디 있을까?', hint: '울릉도와 독도도 이 도에 속해요.', cheer: '맞아요! 불국사는 경상북도에 있어요.' },
+  { region: 'kr-jeonbuk', ask: '전주 한옥마을은 어디 있을까?', hint: '비빔밥으로 유명한 곳이에요.', cheer: '맞아요! 전주 한옥마을은 전북특별자치도에 있어요.' },
+  { region: 'kr-jeonnam', ask: '순천만 갈대밭은 어디 있을까?', hint: '섬이 많은 남쪽 도예요.', cheer: '맞아요! 순천만은 전라남도에 있어요.' },
+  { region: 'kr-daejeon', ask: '엑스포과학공원은 어디 있을까?', hint: '과학 연구가 많이 모인 도시예요.', cheer: '맞아요! 엑스포과학공원은 대전광역시에 있어요.' },
+  { region: 'kr-gwangju', ask: '무등산은 어디 있을까?', hint: '예술로 이름난 도시 곁에 있어요.', cheer: '맞아요! 무등산은 광주광역시 곁이에요.' },
+  { region: 'kr-ulsan', ask: '대왕암은 어디 있을까?', hint: '고래 이야기로 이름난 바다 도시예요.', cheer: '맞아요! 대왕암은 울산광역시에 있어요.' },
+  { region: 'kr-sejong', ask: '넓은 호수공원이 있는 계획도시는 어디일까?', hint: '정부 기관이 많이 모여 있어요.', cheer: '맞아요! 세종호수공원은 세종특별자치시에 있어요.' },
+  { region: 'kr-chungbuk', ask: '속리산 법주사는 어디 있을까?', hint: '나라의 한가운데에 있어요.', cheer: '맞아요! 법주사는 충청북도에 있어요.' },
+  { region: 'kr-chungnam', ask: '공주 공산성은 어디 있을까?', hint: '서해와 맞닿아 있어요.', cheer: '맞아요! 공산성은 충청남도에 있어요.' },
+  { region: 'kr-incheon', ask: '큰 공항과 차이나타운은 어디 있을까?', hint: '서해로 나가는 관문 도시예요.', cheer: '맞아요! 그곳은 인천광역시예요.' },
+  { region: 'kr-daegu', ask: '여름이 덥기로 유명한 분지 도시는 어디일까?', hint: '사과가 많이 나요.', cheer: '맞아요! 그 분지 도시는 대구광역시예요.' },
+  { region: 'kr-gyeongnam', ask: '김해가 있는 도는 어디일까?', hint: '남해 바다와 지리산 자락이 만나요.', cheer: '맞아요! 김해는 경상남도에 있어요.' },
+];
+
+const VISITED_PROVINCE_KEY = 'theglobe-visited-provinces';
+
+function isFirstLevelRegion(region: RegionId): region is (typeof firstLevelRegionOrder)[number] {
+  return (firstLevelRegionOrder as readonly RegionId[]).includes(region);
+}
+
+function loadVisitedProvinces() {
+  try {
+    const raw = localStorage.getItem(VISITED_PROVINCE_KEY);
+    if (!raw) return [] as RegionId[];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [] as RegionId[];
+    return parsed.filter((id): id is RegionId => typeof id === 'string' && isFirstLevelRegion(id as RegionId));
+  } catch {
+    return [] as RegionId[];
+  }
+}
+
+function saveVisitedProvinces(ids: readonly RegionId[]) {
+  try {
+    localStorage.setItem(VISITED_PROVINCE_KEY, JSON.stringify(ids));
+  } catch {
+    // Storage can be unavailable. Stamps still work for this visit.
+  }
+}
+
 type OverviewPlace = {
   readonly name: string;
   readonly lon: number;
@@ -506,6 +559,73 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   let highlightedHouseholdId: HouseholdId | null = null;
   let nameGateState: OverlayState['nameGateState'] = 'closed';
   let unlockedHousehold: HouseholdId | null = null;
+  let quizActive = false;
+  let quizIndex = 0;
+  let quizWrongCount = 0;
+  let quizPhase: 'ask' | 'correct' = 'ask';
+  let quizMessage = '지도나 큰 단추를 눌러 봐요.';
+  const visitedProvinces = new Set<RegionId>(loadVisitedProvinces());
+
+  function rememberVisit(region: RegionId) {
+    if (!isFirstLevelRegion(region) || visitedProvinces.has(region)) return;
+    visitedProvinces.add(region);
+    saveVisitedProvinces([...visitedProvinces]);
+  }
+
+  function handleRegionIntent(region: RegionId) {
+    if (quizActive && selectedRegion === 'kr-korea-overview' && isFirstLevelRegion(region)) {
+      answerQuiz(region);
+      return;
+    }
+    activateRegion(region);
+  }
+
+  function answerQuiz(region: RegionId) {
+    const prompt = quizPrompts[quizIndex];
+    if (!prompt || quizPhase === 'correct') return;
+    if (region === prompt.region) {
+      quizPhase = 'correct';
+      quizWrongCount = 0;
+      quizMessage = prompt.cheer;
+      highlightedRegion = null;
+      rememberVisit(region);
+    } else {
+      quizWrongCount += 1;
+      quizMessage = quizWrongCount >= 2 ? `힌트: ${prompt.hint}` : '아직이에요. 다른 곳을 눌러 봐요.';
+      highlightedRegion = region;
+    }
+    render();
+    onStateChange();
+  }
+
+  function startQuiz() {
+    quizActive = true;
+    quizIndex = 0;
+    quizWrongCount = 0;
+    quizPhase = 'ask';
+    quizMessage = '지도나 큰 단추를 눌러 봐요.';
+    highlightedRegion = null;
+    setRegion('kr-korea-overview');
+  }
+
+  function nextQuizQuestion() {
+    quizIndex = (quizIndex + 1) % quizPrompts.length;
+    quizWrongCount = 0;
+    quizPhase = 'ask';
+    quizMessage = quizIndex === 0 ? '한 바퀴를 다 돌았어요. 다시 풀어 봐요.' : '지도나 큰 단추를 눌러 봐요.';
+    highlightedRegion = null;
+    render();
+    onStateChange();
+  }
+
+  function stopQuiz() {
+    quizActive = false;
+    quizPhase = 'ask';
+    quizWrongCount = 0;
+    highlightedRegion = null;
+    render();
+    onStateChange();
+  }
 
   const header = document.createElement('div');
   header.className = 'korea-map-header';
@@ -582,6 +702,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     selectedHousehold = null;
     nameGateState = 'closed';
     unlockedHousehold = null;
+    if (isFirstLevelRegion(region)) rememberVisit(region);
     render();
     onStateChange();
   }
@@ -608,12 +729,15 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     header.replaceChildren();
     const copy = document.createElement('div');
     appendText(copy, 'h2', routeNodes[selectedRegion].label);
+    const activeQuiz = quizActive && selectedRegion === 'kr-korea-overview' ? quizPrompts[quizIndex] : null;
     const factLine = appendText(
       copy,
       'p',
-      regionInfoById[selectedRegion]?.fact ?? '지역을 눌러 이름과 짧은 이야기를 들어 봐요.',
+      activeQuiz ? (quizPhase === 'correct' ? quizMessage : activeQuiz.ask) : (regionInfoById[selectedRegion]?.fact ?? '지역을 눌러 이름과 짧은 이야기를 들어 봐요.'),
       'korea-fact-line',
     );
+    const stampLine = appendText(copy, 'p', `탐험 도장 ${visitedProvinces.size}/17`, 'korea-stamp-progress');
+    stampLine.dataset.stampCount = String(visitedProvinces.size);
     factLine.dataset.regionFact = selectedRegion;
     const breadcrumbs = document.createElement('div');
     breadcrumbs.className = 'korea-breadcrumbs';
@@ -701,7 +825,8 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       const isSelected = id === selectedRegion;
       const isNext = nextIds.has(id);
       const isHouseholdTarget = householdTarget.has(id);
-      polygon.setAttribute('class', ['korea-region', isSelected ? 'is-selected' : '', isNext ? 'is-next' : '', isHouseholdTarget ? 'has-households' : ''].filter(Boolean).join(' '));
+      const quizHit = quizActive && quizPhase === 'correct' && quizPrompts[quizIndex]?.region === id;
+      polygon.setAttribute('class', ['korea-region', isSelected ? 'is-selected' : '', isNext ? 'is-next' : '', isHouseholdTarget ? 'has-households' : '', quizHit ? 'is-quiz-hit' : ''].filter(Boolean).join(' '));
       polygon.dataset.regionId = id;
       polygon.setAttribute('aria-label', isNext ? `${feature.nameKo}로 확대` : isSelected ? `${feature.nameKo} 선택됨` : feature.nameKo);
       const isToggleTarget = isSelected && Boolean(selectedNode.parent);
@@ -712,11 +837,11 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
         polygon.addEventListener('pointerleave', () => setHighlightedRegion(null));
         polygon.addEventListener('focus', () => setHighlightedRegion(id));
         polygon.addEventListener('blur', () => setHighlightedRegion(null));
-        polygon.addEventListener('click', () => activateRegion(id));
+        polygon.addEventListener('click', () => handleRegionIntent(id));
         polygon.addEventListener('keydown', (event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
-            activateRegion(id);
+            handleRegionIntent(id);
           }
         });
       }
@@ -799,6 +924,28 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
         places.append(text);
       }
       vectorLayer.append(places);
+      const stamps = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      stamps.setAttribute('class', 'korea-stamp-layer');
+      stamps.setAttribute('aria-hidden', 'true');
+      for (const id of firstLevelRegionOrder) {
+        if (!visitedProvinces.has(id)) continue;
+        const [x, y] = featureById(id).centroid;
+        const mark = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        mark.setAttribute('class', 'korea-visited-stamp');
+        mark.dataset.regionId = id;
+        const badge = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        badge.setAttribute('cx', String(x + 1.7));
+        badge.setAttribute('cy', String(y - 1.7));
+        badge.setAttribute('r', '1.15');
+        const star = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        star.setAttribute('x', String(x + 1.7));
+        star.setAttribute('y', String(y - 1.25));
+        star.setAttribute('text-anchor', 'middle');
+        star.textContent = '★';
+        mark.append(badge, star);
+        stamps.append(mark);
+      }
+      vectorLayer.append(stamps);
     }
 
     if (familyTraceState === 'terminal') {
@@ -864,6 +1011,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     mapMount.dataset.mapContract = host.dataset.mapContract ?? 'geometry-auto-fit';
     mapMount.dataset.islandCoverage = host.dataset.islandCoverage ?? 'province-rings';
     mapMount.dataset.hasSelection = selectedRegion === 'kr-korea-overview' ? 'false' : 'true';
+    host.dataset.quiz = quizActive ? 'on' : 'off';
     mapMount.dataset.fitStrategy = balancedFit.strategy;
     mapMount.dataset.fitScale = String(balancedFit.scale);
     mapMount.dataset.fitBounds = `${balancedFit.fittedBounds.minX},${balancedFit.fittedBounds.minY},${balancedFit.fittedBounds.maxX},${balancedFit.fittedBounds.maxY}`;
@@ -896,6 +1044,12 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     appendText(routePanel, 'h3', selectedRegion === 'kr-korea-overview' ? '대한민국 17개 광역 행정구역' : '가족이 있는 지역으로 한 단계 더 들어가기');
     if (selectedRegion === 'kr-korea-overview') {
       appendText(routePanel, 'p', '색이 다른 지역을 누르면 이름과 짧은 이야기가 나와요. 서울, 부산, 경상남도는 가족 집까지 한 단계 더 들어갈 수 있어요.');
+      const quizLaunch = document.createElement('button');
+      quizLaunch.type = 'button';
+      quizLaunch.className = 'primary korea-quiz-launch';
+      quizLaunch.textContent = '퀴즈 풀기';
+      quizLaunch.addEventListener('click', startQuiz);
+      routePanel.append(quizLaunch);
     }
     const choices = document.createElement('div');
     choices.className = 'route-choice-grid';
@@ -911,7 +1065,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       button.addEventListener('blur', () => setHighlightedRegion(null));
       appendText(button, 'strong', feature.nameKo);
       appendText(button, 'span', feature.nameEn);
-      button.addEventListener('click', () => activateRegion(nextId));
+      button.addEventListener('click', () => handleRegionIntent(nextId));
       choices.append(button);
     });
     routePanel.append(choices);
@@ -941,8 +1095,57 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     routePanel.append(cards);
   }
 
+  function renderQuizPanel() {
+    const prompt = quizPrompts[quizIndex];
+    if (!prompt) return;
+    const section = document.createElement('section');
+    section.className = 'korea-quiz';
+    appendText(section, 'p', `탐험 퀴즈 ${quizIndex + 1}/17`, 'map-kicker');
+    appendText(section, 'h3', prompt.ask);
+    const feedback = appendText(section, 'p', quizMessage, 'quiz-feedback');
+    feedback.dataset.tone = quizPhase === 'correct' ? 'correct' : quizWrongCount > 0 ? 'wrong' : 'ask';
+    if (quizPhase === 'correct') {
+      const next = document.createElement('button');
+      next.type = 'button';
+      next.className = 'primary korea-quiz-next';
+      next.textContent = quizIndex === quizPrompts.length - 1 ? '처음부터 다시' : '다음 문제';
+      next.addEventListener('click', nextQuizQuestion);
+      section.append(next);
+    } else {
+      const choices = document.createElement('div');
+      choices.className = 'route-choice-grid quiz-choice-grid';
+      for (const regionId of firstLevelRegionOrder) {
+        const feature = featureById(regionId);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'route-choice quiz-choice';
+        button.dataset.regionId = regionId;
+        button.addEventListener('pointerenter', () => setHighlightedRegion(regionId));
+        button.addEventListener('pointerleave', () => setHighlightedRegion(null));
+        button.addEventListener('focus', () => setHighlightedRegion(regionId));
+        button.addEventListener('blur', () => setHighlightedRegion(null));
+        appendText(button, 'strong', feature.nameKo);
+        button.addEventListener('click', () => answerQuiz(regionId));
+        choices.append(button);
+      }
+      section.append(choices);
+    }
+    const exit = document.createElement('button');
+    exit.type = 'button';
+    exit.className = 'ghost wide korea-quiz-exit';
+    exit.textContent = '지도 탐험으로 돌아가기';
+    exit.addEventListener('click', stopQuiz);
+    section.append(exit);
+    routePanel.append(section);
+    syncHighlightState();
+  }
+
   function renderRoutePanel() {
     routePanel.replaceChildren();
+    if (quizActive && selectedRegion === 'kr-korea-overview') {
+      renderQuizPanel();
+      return;
+    }
     const node = routeNodes[selectedRegion];
     const regionInfo = regionInfoById[selectedRegion];
     if (regionInfo) renderRegionInfo(node, regionInfo);

@@ -27,6 +27,7 @@ app.innerHTML = `
         <span data-state-copy>where are you? where do you want to go?</span>
       </div>
       <div class="hint">드래그해서 지구를 돌리고, 탐험 모드에서 세계의 수도와 인기 도시를 만나보세요</div>
+      <button type="button" class="korea-tap-hint" data-korea-hint hidden>한국을 눌러 보세요</button>
       <section class="korea-map-host" aria-label="한국 가족 지도"></section>
     </section>
 
@@ -61,6 +62,18 @@ let koreaOverlayLoad: Promise<KoreaFamilyOverlay> | null = null;
 let overlay: ExplorationOverlay | null = null;
 let explorationOverlayLoad: Promise<ExplorationOverlay> | null = null;
 
+type GlobeQaSnapshot = {
+  globeRotation: { x: number; y: number; z: number };
+  [key: string]: unknown;
+};
+
+const QA_ROTATION_INTERVAL_MS = 200;
+let lastQaRotationAt = 0;
+
+function qaSnapshot(): GlobeQaSnapshot | undefined {
+  return (window as Window & { __GLOBE_QA__?: GlobeQaSnapshot }).__GLOBE_QA__;
+}
+
 function updateQaState() {
   const selectedCity = overlay?.getSelectedCity() ?? null;
   const lastFocus = overlay?.getLastFocus() ?? null;
@@ -69,7 +82,8 @@ function updateQaState() {
     selectedMarkerGlowCityId: null,
     selectedCityListHighlighted: false,
   };
-  (window as Window & { __GLOBE_QA__?: Record<string, unknown> }).__GLOBE_QA__ = {
+  lastQaRotationAt = performance.now();
+  (window as Window & { __GLOBE_QA__?: GlobeQaSnapshot }).__GLOBE_QA__ = {
     state: globe.getState(),
     viewMode: globe.getViewMode(),
     globeRotation: globe.getRotation(),
@@ -167,6 +181,7 @@ async function enterKoreaFamilyMap() {
   globe.setKoreaFocus(true);
   const loadedKoreaOverlay = await ensureKoreaFamilyOverlay();
   loadedKoreaOverlay.open();
+  dismissKoreaHint();
   updateQaState();
 }
 
@@ -180,6 +195,26 @@ function handleGlobeTap(event: PointerEvent) {
 }
 
 window.addEventListener('korea-family-map-request', () => { void enterKoreaFamilyMap(); });
+
+const koreaHintKey = 'theglobe-korea-hint-seen';
+const koreaHintButton = document.querySelector<HTMLButtonElement>('[data-korea-hint]');
+function koreaHintSeen() {
+  try {
+    return localStorage.getItem(koreaHintKey) === '1';
+  } catch {
+    return true;
+  }
+}
+function dismissKoreaHint() {
+  try {
+    localStorage.setItem(koreaHintKey, '1');
+  } catch {
+    // Private mode can block storage; hiding the hint is enough.
+  }
+  if (koreaHintButton) koreaHintButton.hidden = true;
+}
+if (koreaHintButton && !koreaHintSeen()) koreaHintButton.hidden = false;
+koreaHintButton?.addEventListener('click', dismissKoreaHint);
 
 const friendlyStateLabels: Record<string, string> = {
   boot: 'Preparing Earth',
@@ -277,15 +312,29 @@ resize();
 
 globe.loadEarth();
 
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+let reduceMotion = reducedMotionQuery.matches;
+reducedMotionQuery.addEventListener('change', () => {
+  reduceMotion = reducedMotionQuery.matches;
+});
+
+function publishQaRotation(now: number) {
+  const snapshot = qaSnapshot();
+  if (!snapshot || now - lastQaRotationAt < QA_ROTATION_INTERVAL_MS) return;
+  lastQaRotationAt = now;
+  snapshot.globeRotation = globe.getRotation();
+}
+
 function animate() {
   requestAnimationFrame(animate);
-  if (!isDragging && globe.getViewMode() === 'earth') {
+  if (!isDragging && globe.getViewMode() === 'earth' && !reduceMotion) {
     globe.drift(velocityX, velocityY);
     velocityX = THREE.MathUtils.lerp(velocityX, 0.0016, 0.006);
     velocityY *= 0.96;
   }
-  globe.animateMarkers(performance.now());
-  updateQaState();
+  const now = performance.now();
+  globe.animateMarkers(now);
+  publishQaRotation(now);
   globe.render();
 }
 animate();

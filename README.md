@@ -1,6 +1,14 @@
 # The Globe
 
-A premium, shareable 3D globe gift for the whole family.
+A family gift: a small 3D globe for spinning together, then a Korea map the kids can tap.
+
+Live site: https://ys-laube.github.io/theglobe/
+
+![가족 지구본](public/og-image.png)
+
+Tap Korea on the globe and the map opens. Each province has a short fact, a stamp when you visit it, and a simple quiz. The household name gate only reveals the family's Naver Band links. It is a lightweight cue stored in the page, not a login and not real authentication.
+
+## Korea family map zoom data notes
 
 ## Korea family map zoom data notes
 
@@ -34,7 +42,7 @@ separate city-content task explicitly owns that edit.
 ## Typography asset notes
 
 The hero script title uses a bundled self-hosted `Great Vibes` font asset at
-`src/assets/fonts/great-vibes-v21-latin-regular.ttf`. Runtime CSS must not import
+`src/assets/fonts/great-vibes-v21-latin-regular.woff2`. Runtime CSS must not import
 Google Fonts, gstatic, or any other font CDN; the system script stack remains only
 as fallback if the local asset cannot render.
 

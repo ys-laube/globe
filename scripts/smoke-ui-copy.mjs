@@ -86,7 +86,7 @@ assert(sources['src/assetsPolicy.ts'].includes('shouldForcePrimaryTextureFailure
 assert(sources['src/globeRenderer.ts'].includes('loadPrimaryEarthTexture'), 'globe renderer must load primary Earth imagery through the image helper');
 
 assert(sources['src/styles.css'].includes('@font-face') && sources['src/styles.css'].includes('Great Vibes Self Hosted'), 'script title must use a self-hosted premium script @font-face');
-assert(sources['src/styles.css'].includes('./assets/fonts/great-vibes-v21-latin-regular.ttf'), 'script title font must load from the bundled app asset path');
+assert(sources['src/styles.css'].includes('./assets/fonts/great-vibes-v21-latin-regular.woff2'), 'script title font must load from the bundled app asset path');
 assert(!/fonts\.(?:googleapis|gstatic)\.com|https?:\/\//i.test(sources['src/styles.css']), 'runtime CSS must not load the script font from a CDN or external URL');
 assert(sources['src/styles.css'].includes('font-family: "Great Vibes Self Hosted"'), 'script-title must prefer the self-hosted script font before system fallbacks');
 assert(!combined.includes('korea-raster-layer') && !combined.includes('korea-raster-image'), 'Korea UI source must not retain raster layer/image contracts');
