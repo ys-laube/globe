@@ -296,7 +296,7 @@ assert(globeRendererSource.includes('FALLBACK_ATTRIBUTION'), 'globe renderer mus
 assert(!/"(leaflet|mapbox-gl|@googlemaps\/[^\"]+|ol|kakao)"/.test(packageLockSource), 'package lock must not include runtime map API dependencies');
 
 assert(stylesSource.includes('@font-face') && stylesSource.includes('Great Vibes Self Hosted'), 'hero script title must declare a self-hosted premium script font');
-assert(stylesSource.includes('./assets/fonts/great-vibes-v21-latin-regular.ttf'), 'hero script title font must be bundled from src/assets/fonts');
+assert(stylesSource.includes('./assets/fonts/great-vibes-v21-latin-regular.woff2'), 'hero script title font must be bundled from src/assets/fonts');
 assert(!/fonts\.(?:googleapis|gstatic)\.com/i.test(stylesSource), 'runtime CSS must not load the title font from Google/CDN hosts');
 assert(!/@import\s+url\(https?:/i.test(stylesSource), 'runtime CSS must not import remote font stylesheets');
 assert(worldBorders.schemaVersion === 1, 'world border schemaVersion must be 1');

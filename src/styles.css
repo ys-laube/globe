@@ -3,7 +3,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("./assets/fonts/great-vibes-v21-latin-regular.ttf") format("truetype");
+  src: url("./assets/fonts/great-vibes-v21-latin-regular.woff2") format("woff2");
 }
 
 :root {
@@ -541,6 +541,11 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .korea-map-canvas[data-has-selection="true"] .korea-region:not(.is-selected):not(.is-next):not(.is-highlighted):not(.has-households) {
   filter: saturate(0.72) brightness(0.86);
 }
+.korea-region.is-quiz-hit {
+  fill: #f8e7a2;
+  stroke: #fff8dc;
+  stroke-width: 1.15;
+}
 .korea-region.is-selected {
   fill: #f8e7a2;
   stroke: #fff8dc;
@@ -566,6 +571,43 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   stroke-width: 0.28;
   animation: koreaPlacePulse 2.8s ease-in-out infinite;
 }
+.korea-stamp-layer, .korea-visited-stamp { pointer-events: none; }
+.korea-visited-stamp circle { fill: #f6d36b; stroke: #7c4a03; stroke-width: 0.18; }
+.korea-visited-stamp text { fill: #7c4a03; font-size: 1.7px; font-weight: 900; }
+.korea-stamp-progress {
+  display: inline-flex;
+  width: fit-content;
+  margin: 0.55rem 0 0;
+  padding: 0.38rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(250, 204, 21, 0.16);
+  border: 1px solid rgba(250, 204, 21, 0.32);
+  color: #fde68a;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+.korea-quiz-launch, .korea-quiz-next, .quiz-choice { min-height: 56px; }
+.korea-quiz-launch, .korea-quiz-next { width: 100%; }
+.korea-quiz { display: grid; gap: 0.75rem; }
+.quiz-feedback { margin: 0; font-weight: 800; line-height: 1.5; }
+.quiz-feedback[data-tone="correct"] { color: #fde68a; }
+.quiz-feedback[data-tone="wrong"] { color: #fecdd3; }
+.quiz-feedback[data-tone="ask"] { color: #e0f2fe; }
+.korea-tap-hint {
+  position: absolute;
+  left: 50%;
+  top: 4.4rem;
+  transform: translateX(-50%);
+  z-index: 6;
+  min-height: 48px;
+  padding: 0.75rem 1.1rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f8e7a2, #f59e0b);
+  color: #1f1303;
+  font-weight: 800;
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.32);
+}
+.korea-tap-hint[hidden] { display: none; }
 @keyframes koreaPlacePulse {
   0%, 100% { opacity: 0.78; }
   50% { opacity: 1; }
@@ -854,4 +896,10 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
     gap: 0.35rem;
     padding: 0.72rem;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .korea-place-dot { animation: none; }
+  .korea-map-overlay,
+  #globe { animation: none; transition: none; }
 }
